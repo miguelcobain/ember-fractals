@@ -6,6 +6,20 @@ const { Component, computed, String: { htmlSafe }, run } = Ember;
 const { select: d3select, mouse: d3mouse } = d3Selection;
 const { scaleLinear } = d3Scale;
 
+function throttleWithRAF (fn) {
+  let running = false;
+  return function () {
+    if (running) {
+      return;
+    }
+    running = true;
+    window.requestAnimationFrame(() => {
+      fn.apply(this, arguments);
+      running = false;
+    });
+  };
+}
+
 export default Component.extend({
   tagName: 'svg',
 
@@ -39,14 +53,11 @@ export default Component.extend({
   },
 
   onMouseMove() {
-    if (this.running) {
-      return;
-    }
-
-    this.running = true;
-
     let [x, y] = d3mouse(this.element);
+    this.update(x, y);
+  },
 
+  update: throttleWithRAF(function (x, y) {
     let scaleFactor = scaleLinear().domain([this.get('height'), 0]).range([0, 0.8]);
 
     let scaleLean = scaleLinear().domain([0, this.get('width') / 2, this.get('width')]).range([0.5, 0, -0.5]);
@@ -55,9 +66,7 @@ export default Component.extend({
       heightFactor: scaleFactor(y),
       lean: scaleLean(x)
     });
-
-    this.running = false;
-  },
+  }),
 
   initialX: computed('width', function() {
     return this.get('width') / 2 - 40;

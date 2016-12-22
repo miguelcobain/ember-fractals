@@ -8,17 +8,22 @@ const { interpolateViridis } = d3Scale;
 export default Component.extend({
   tagName: '',
 
-  result: computed('w', 'heightFactor', 'lean', function() {
+  didReceiveAttrs() {
+    this._super(...arguments);
     let args = this.getProperties('w', 'heightFactor', 'lean');
-    return memoizedCalc(args);
-  }),
+    let vars = memoizedCalc(args);
 
-  nextRight: computed.readOnly('result.nextRight'),
-  nextLeft: computed.readOnly('result.nextLeft'),
-  A: computed.readOnly('result.A'),
-  B: computed.readOnly('result.B'),
+    this.setProperties(vars);
+    this.computeTransformStyle();
+    this.computeSquareFillStyle();
+    this.computeNextYLeft();
+    this.computeNextXRight();
+    this.computeNextYRight();
+    this.computeNextLvl();
+    this.computeShouldRender();
+  },
 
-  transformStyle: computed('x', 'y', 'left', 'right', 'w', 'A', 'B', function() {
+  computeTransformStyle() {
     let { x, y, left, right, w, A, B } = this.getProperties('x', 'y', 'left', 'right', 'w', 'A', 'B');
     let rotate = '';
 
@@ -28,35 +33,35 @@ export default Component.extend({
       rotate = `rotate(${B} ${w} ${w})`;
     }
 
-    return `translate(${x} ${y}) ${rotate}`;
-  }),
+    this.set('transformStyle', `translate(${x} ${y}) ${rotate}`);
+  },
 
-  squareFillStyle: computed('lvl', 'maxlvl', function() {
+  computeSquareFillStyle() {
     let { lvl, maxlvl } = this.getProperties('lvl', 'maxlvl');
-    return htmlSafe(`fill: ${interpolateViridis(lvl / maxlvl)}`);
-  }),
+    this.set('squareFillStyle', htmlSafe(`fill: ${interpolateViridis(lvl / maxlvl)}`));
+  },
 
   nextXLeft: 0,
-  nextYLeft: computed('nextLeft', function() {
-    return -this.get('nextLeft');
-  }),
+  computeNextYLeft() {
+    this.set('nextYLeft', -this.get('nextLeft'));
+  },
 
-  nextXRight: computed('w', 'nextRight', function() {
+  computeNextXRight() {
     let { w, nextRight } = this.getProperties('w', 'nextRight');
-    return w - nextRight;
-  }),
+    this.set('nextXRight', w - nextRight);
+  },
 
-  nextYRight: computed('nextRight', function() {
-    return -this.get('nextRight');
-  }),
+  computeNextYRight() {
+    this.set('nextYRight', -this.get('nextRight'));
+  },
 
-  nextLvl: computed('lvl', function() {
-    return this.get('lvl') + 1;
-  }),
+  computeNextLvl() {
+    this.set('nextLvl', this.get('lvl') + 1);
+  },
 
-  shouldRender: computed('lvl', 'w', 'maxlvl', function() {
+  computeShouldRender() {
     let { lvl, w, maxlvl } = this.getProperties('lvl', 'w', 'maxlvl');
-    return lvl < maxlvl && w >= 1;
-  })
+    this.set('shouldRender', lvl < maxlvl && w >= 1);
+  }
 
 });
