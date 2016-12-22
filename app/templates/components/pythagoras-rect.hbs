@@ -1,0 +1,29 @@
+{{#if shouldRender}}
+  <g transform={{transformStyle}}>
+
+    <rect width={{w}} height={{w}}
+      x="0" y="0"
+      style={{squareFillStyle}} />
+
+    {{pythagoras-rect
+      w=nextLeft
+      x=nextXLeft
+      y=nextYLeft
+      lvl=nextLvl
+      maxlvl=maxlvl
+      heightFactor=heightFactor
+      lean=lean
+      left=true}}
+
+    {{pythagoras-rect
+      w=nextRight
+      x=nextXRight
+      y=nextYRight
+      lvl=nextLvl
+      maxlvl=maxlvl
+      heightFactor=heightFactor
+      lean=lean
+      right=true}}
+      
+  </g>
+{{/if}}
